@@ -24,29 +24,44 @@ class Restaurant {
 
     createRestaurantMarkup() {
         const restaurant = document.createElement('LI');
-        const departments = document.createElement('UL');
-        const buttonDelete = document.createElement('BUTTON');
-        const buttonEdit = document.createElement('BUTTON');
 
-        buttonDelete.textContent = 'Delete';
-        buttonEdit.textContent = 'Edit';
+        restaurant.insertAdjacentHTML(
+            'afterbegin',
+            `
+            <img src="https://amc.ua/images/image-not-found.jpg" width="300" alt="Restaurant photo" />
+            <span>Title: ${this.#title}</span>
+            <ul>
+                <li>
+                    <button type="submit" data-action="view">View more...</button>
+                </li>
+                <li>
+                    <button type="submit" data-action="edit">Edit</button>
+                </li>
+                <li>
+                    <button type="submit" data-action="delete">Delete</button>
+                </li>
+            </ul>
 
-        restaurant.innerHTML = `
-            <span>Title: ${this.#title}</span></br>
-            <span>Departments: </span>
-        `;
 
-        for (let i = 0; i < this.#departments.length; i++) {
-            const { title } = this.#departments[i];
-            const item = document.createElement('LI');
+        `,
+        );
 
-            item.textContent = title;
-            departments.appendChild(item);
-        }
+        // const buttonDelete = document.createElement('BUTTON');
+        // const buttonEdit = document.createElement('BUTTON');
+        // const buttonInfo = document.createElement('BUTTON');
 
-        restaurant.appendChild(departments);
-        restaurant.appendChild(buttonEdit);
-        restaurant.appendChild(buttonDelete);
+        // buttonInfo.textContent = 'View more...';
+        // buttonEdit.textContent = 'Edit';
+        // buttonDelete.textContent = 'Delete';
+
+        // restaurant.innerHTML = `
+        //     <span>Title: ${this.#title}</span></br>
+
+        // `;
+
+        // restaurant.appendChild(buttonInfo);
+        // restaurant.appendChild(buttonEdit);
+        // restaurant.appendChild(buttonDelete);
 
         return restaurant;
     }
@@ -189,17 +204,20 @@ function handleClick(event) {
     event.preventDefault();
 
     const restaurantsList = document.querySelector('.list');
+    const action = event.target.dataset.action;
 
-    if (event.target.textContent === 'Delete') {
-        deleteRestaurant(restaurantsList, event);
-
-        return;
-    }
-
-    if (event.target.textContent === 'Edit') {
-        editRestaurantInfo(restaurantsList, event);
-
-        return;
+    switch (action) {
+        case 'view':
+            // TODO
+            break;
+        case 'edit':
+            editRestaurantInfo(restaurantsList, event);
+            break;
+        case 'delete':
+            deleteRestaurant(restaurantsList, event);
+            break;
+        default:
+            return;
     }
 }
 
@@ -233,6 +251,8 @@ document.addEventListener('DOMContentLoaded', event => {
     restaurantsList.addEventListener('click', handleClick);
 
     const a = new Restaurant('.list', 'Lion', restPositions, restDepartments);
+    new Restaurant('.list', 'Lion', restPositions, restDepartments);
+    new Restaurant('.list', 'Lion', restPositions, restDepartments);
 
-    console.log(a);
+    // console.log(a);
 });
