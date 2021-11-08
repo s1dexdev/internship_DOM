@@ -1,4 +1,5 @@
 import { restPositions, restDepartments } from './dbRest.js';
+import myModal from './modal.js';
 
 class Restaurant {
     #wrapper;
@@ -23,25 +24,29 @@ class Restaurant {
 
     createRestaurantMarkup() {
         const restaurant = document.createElement('LI');
-        const restTitle = document.createElement('P');
-        const depart = document.createElement('SPAN');
         const departments = document.createElement('UL');
+        const buttonDelete = document.createElement('BUTTON');
+        const buttonEdit = document.createElement('BUTTON');
+
+        buttonDelete.textContent = 'Delete';
+        buttonEdit.textContent = 'Edit';
+
+        restaurant.innerHTML = `
+            <span>Title: ${this.#title}</span></br>
+            <span>Departments: </span>
+        `;
 
         for (let i = 0; i < this.#departments.length; i++) {
             const { title } = this.#departments[i];
             const item = document.createElement('LI');
 
-            item.classList.add('list-item');
             item.textContent = title;
             departments.appendChild(item);
         }
 
-        restTitle.textContent = `Title: ${this.#title}`;
-        depart.textContent = `Departments: `;
-
-        restaurant.appendChild(restTitle);
-        restaurant.appendChild(depart);
         restaurant.appendChild(departments);
+        restaurant.appendChild(buttonEdit);
+        restaurant.appendChild(buttonDelete);
 
         return restaurant;
     }
@@ -91,8 +96,6 @@ class Restaurant {
                     if (!isFired) {
                         accumulator += salary;
                         counterPersons++;
-
-                        return accumulator;
                     }
 
                     return accumulator;
@@ -125,8 +128,6 @@ class Restaurant {
                         if (accumulator[position].minSalary > salary) {
                             accumulator[position].minSalary = salary;
                         }
-
-                        return accumulator;
                     }
 
                     return accumulator;
@@ -184,14 +185,54 @@ function createListRest(selector) {
     return list;
 }
 
+function handleClick(event) {
+    event.preventDefault();
+
+    const restaurantsList = document.querySelector('.list');
+
+    if (event.target.textContent === 'Delete') {
+        deleteRestaurant(restaurantsList, event);
+
+        return;
+    }
+
+    if (event.target.textContent === 'Edit') {
+        editRestaurantInfo(restaurantsList, event);
+
+        return;
+    }
+}
+
+function editRestaurantInfo(restaurantsList, event) {
+    const modal = myModal();
+
+    modal.open();
+
+    const form = document.querySelector('.form');
+    const buttonAccept = document.querySelector('[data-action="btn-accept"]');
+
+    buttonAccept.addEventListener('click', () => {
+        // TODO
+
+        modal.close();
+    });
+}
+
+function deleteRestaurant(restaurantsList, event) {
+    const restaurant = event.target.parentNode;
+
+    restaurantsList.removeChild(restaurant);
+
+    return true;
+}
+
 document.addEventListener('DOMContentLoaded', event => {
     const app = document.querySelector('.app');
+    const restaurantsList = createListRest(app);
 
-    createListRest(app);
+    restaurantsList.addEventListener('click', handleClick);
 
     const a = new Restaurant('.list', 'Lion', restPositions, restDepartments);
-    const b = new Restaurant('.list', 'Rogt', restPositions, restDepartments);
-    const c = new Restaurant('.list', 'Zyre', restPositions, restDepartments);
 
     console.log(a);
 });

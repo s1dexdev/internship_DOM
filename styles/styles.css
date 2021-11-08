@@ -1,0 +1,55 @@
+/* Modal */
+
+.modal.open .modal-overlay,
+.modal.open .modal-window {
+    opacity: 1;
+    z-index: 1000;
+}
+
+.modal-overlay,
+.modal-window {
+    opacity: 0;
+    z-index: -1;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-window {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 500px;
+    height: 500px;
+
+    border-radius: 5px;
+    background-color: #ffff;
+}
+
+.modal-close {
+    position: absolute;
+    top: 0px;
+    right: 15px;
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    color: rgb(0, 0, 0);
+    font-size: 40px;
+
+    cursor: pointer;
+}
