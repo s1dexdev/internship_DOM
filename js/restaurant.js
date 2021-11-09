@@ -69,8 +69,6 @@ class Restaurant {
                         <p>${item[key]}</p>
                     `;
                 }
-
-                console.log(salaryInfoDetail[item]);
             }
 
             departmentsList.appendChild(item);
@@ -97,25 +95,12 @@ class Restaurant {
     }
 
     editRestaurantInfo(event) {
-        const modal = this.modal();
-
-        modal.open();
-
-        const form = document.querySelector('.form');
-        const buttonAccept = document.querySelector(
-            '[data-action="btn-accept"]',
-        );
-
-        buttonAccept.addEventListener('click', () => {
-            // TODO
-
-            modal.close();
-        });
+        this.modal().open();
     }
 
-    modal(markup) {
+    modal() {
         let isFlag = false;
-        const modalWindowMarkup = this.createModal(markup);
+        const modalWindowMarkup = this.createModal();
         const modal = {
             open() {
                 if (isFlag) {
@@ -148,7 +133,7 @@ class Restaurant {
         return modal;
     }
 
-    createModal(markup) {
+    createModal() {
         const container = document.createElement('div');
 
         container.classList.add('modal');
@@ -163,7 +148,7 @@ class Restaurant {
   `,
         );
 
-        container.querySelector('.modal-window').appendChild(markup);
+        // container.querySelector('.modal-window').appendChild(markup);
         document.body.appendChild(container);
 
         return container;
