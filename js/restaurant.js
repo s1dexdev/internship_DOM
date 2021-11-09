@@ -1,15 +1,12 @@
 import { restPositions, restDepartments } from './dbRest.js';
-import myModal from './modal.js';
 
 class Restaurant {
     #wrapper;
-    #title;
     #departments;
     #positionsId;
 
-    constructor(selector, title, positions, departments) {
+    constructor(selector, positions, departments) {
         this.#wrapper = document.querySelector(selector);
-        this.#title = title;
         this.#departments = departments || [];
         this.#positionsId = positions || {};
 
@@ -19,51 +16,157 @@ class Restaurant {
     render() {
         const restaurant = this.createRestaurantMarkup();
 
+        restaurant.addEventListener('click', this.handleClick.bind(this));
         this.#wrapper.appendChild(restaurant);
     }
 
     createRestaurantMarkup() {
-        const restaurant = document.createElement('LI');
+        const restaurant = document.createElement('DIV');
+        const salaryInfo = this.getAmountSalaryTotal(salary => salary);
+        const salaryInfoDetail = this.getAmountSalaryDetail();
 
-        restaurant.insertAdjacentHTML(
-            'afterbegin',
-            `
+        restaurant.innerHTML = `
             <img src="https://amc.ua/images/image-not-found.jpg" width="300" alt="Restaurant photo" />
-            <span>Title: ${this.#title}</span>
+            <p>Departments info: </p>
+            <ul class="departments"></ul>
+            <p>General info</p>
             <ul>
                 <li>
-                    <button type="submit" data-action="view">View more...</button>
+                    <p>Number of employees: ${this.getNumberEmployees(
+                        employee => employee,
+                    )}</p>
                 </li>
                 <li>
-                    <button type="submit" data-action="edit">Edit</button>
-                </li>
-                <li>
-                    <button type="submit" data-action="delete">Delete</button>
+                    <p>Number of fired employees: ${this.getNumberEmployees(
+                        ({ isFired }) => isFired === true,
+                    )}</p>
                 </li>
             </ul>
+            <div>
+                <button type="button" data-action="edit">Edit</button>
+                <button type="button" data-action="delete">Delete restaurant</button>
+            </div>
+            
+        `;
 
+        const departmentsList = restaurant.querySelector('.departments');
 
-        `,
-        );
+        for (let i = 0; i < this.#departments.length; i++) {
+            const { title } = this.#departments[i];
+            const item = document.createElement('LI');
 
-        // const buttonDelete = document.createElement('BUTTON');
-        // const buttonEdit = document.createElement('BUTTON');
-        // const buttonInfo = document.createElement('BUTTON');
+            item.innerHTML = `
+                <p>Department title - ${title}</p>
+                <p>Total salary by department: ${salaryInfo[title]}</p>
+                <ul class="detail-salary"></ul>
+            `;
 
-        // buttonInfo.textContent = 'View more...';
-        // buttonEdit.textContent = 'Edit';
-        // buttonDelete.textContent = 'Delete';
+            for (let item in salaryInfoDetail) {
+                const item = document.createElement('LI');
 
-        // restaurant.innerHTML = `
-        //     <span>Title: ${this.#title}</span></br>
+                for (let key in item) {
+                    item.innerHTML = `
+                        <p>${item[key]}</p>
+                    `;
+                }
 
-        // `;
+                console.log(salaryInfoDetail[item]);
+            }
 
-        // restaurant.appendChild(buttonInfo);
-        // restaurant.appendChild(buttonEdit);
-        // restaurant.appendChild(buttonDelete);
+            departmentsList.appendChild(item);
+        }
 
         return restaurant;
+    }
+
+    handleClick(event) {
+        event.preventDefault();
+
+        const action = event.target.dataset.action;
+
+        switch (action) {
+            case 'edit':
+                this.editRestaurantInfo(event);
+                break;
+            case 'delete':
+                this.#wrapper.removeChild(event.currentTarget);
+                break;
+            default:
+                return;
+        }
+    }
+
+    editRestaurantInfo(event) {
+        const modal = this.modal();
+
+        modal.open();
+
+        const form = document.querySelector('.form');
+        const buttonAccept = document.querySelector(
+            '[data-action="btn-accept"]',
+        );
+
+        buttonAccept.addEventListener('click', () => {
+            // TODO
+
+            modal.close();
+        });
+    }
+
+    modal(markup) {
+        let isFlag = false;
+        const modalWindowMarkup = this.createModal(markup);
+        const modal = {
+            open() {
+                if (isFlag) {
+                    return;
+                }
+                modalWindowMarkup.classList.add('open');
+            },
+            close() {
+                modalWindowMarkup.classList.remove('open');
+            },
+            destroy() {
+                modalWindowMarkup.parentNode.removeChild(modalWindowMarkup);
+                modalWindowMarkup.removeEventListener('click', listener);
+                window.removeEventListener('keydown', listener);
+
+                isFlag = true;
+            },
+        };
+
+        const listener = event => {
+            if (event.target.dataset.close || event.code === 'Escape') {
+                modal.close();
+                modal.destroy();
+            }
+        };
+
+        modalWindowMarkup.addEventListener('click', listener);
+        window.addEventListener('keydown', listener);
+
+        return modal;
+    }
+
+    createModal(markup) {
+        const container = document.createElement('div');
+
+        container.classList.add('modal');
+        container.insertAdjacentHTML(
+            'afterbegin',
+            `
+        <div class="modal-overlay" data-close="true">
+          <div class="modal-window">
+            <span class="modal-close" data-close="true">&times;</span>
+          </div>
+        </div>
+  `,
+        );
+
+        container.querySelector('.modal-window').appendChild(markup);
+        document.body.appendChild(container);
+
+        return container;
     }
 
     findDepartment(id) {
@@ -191,68 +294,10 @@ class Restaurant {
     }
 }
 
-function createListRest(selector) {
-    const list = document.createElement('UL');
-
-    list.classList.add('list');
-    selector.appendChild(list);
-
-    return list;
-}
-
-function handleClick(event) {
-    event.preventDefault();
-
-    const restaurantsList = document.querySelector('.list');
-    const action = event.target.dataset.action;
-
-    switch (action) {
-        case 'view':
-            // TODO
-            break;
-        case 'edit':
-            editRestaurantInfo(restaurantsList, event);
-            break;
-        case 'delete':
-            deleteRestaurant(restaurantsList, event);
-            break;
-        default:
-            return;
-    }
-}
-
-function editRestaurantInfo(restaurantsList, event) {
-    const modal = myModal();
-
-    modal.open();
-
-    const form = document.querySelector('.form');
-    const buttonAccept = document.querySelector('[data-action="btn-accept"]');
-
-    buttonAccept.addEventListener('click', () => {
-        // TODO
-
-        modal.close();
-    });
-}
-
-function deleteRestaurant(restaurantsList, event) {
-    const restaurant = event.target.parentNode;
-
-    restaurantsList.removeChild(restaurant);
-
-    return true;
-}
-
 document.addEventListener('DOMContentLoaded', event => {
     const app = document.querySelector('.app');
-    const restaurantsList = createListRest(app);
 
-    restaurantsList.addEventListener('click', handleClick);
-
-    const a = new Restaurant('.list', 'Lion', restPositions, restDepartments);
-    new Restaurant('.list', 'Lion', restPositions, restDepartments);
-    new Restaurant('.list', 'Lion', restPositions, restDepartments);
+    const a = new Restaurant('.app', restPositions, restDepartments);
 
     // console.log(a);
 });

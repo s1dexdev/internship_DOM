@@ -7,7 +7,7 @@ const restPositions = {
 
 const restDepartments = [
     {
-        title: 'bar',
+        title: 'Bar',
         number: '1',
         employees: [
             {
@@ -37,7 +37,7 @@ const restDepartments = [
         ],
     },
     {
-        title: 'cook',
+        title: 'Cook',
         number: '2',
         employees: [
             {
@@ -64,10 +64,18 @@ const restDepartments = [
                 salary: 4000,
                 isFired: false,
             },
+            {
+                name: 'Jennifer',
+                surname: 'Jennifer',
+                departmentId: 2,
+                position: restPositions[3],
+                salary: 4000,
+                isFired: false,
+            },
         ],
     },
     {
-        title: 'hall',
+        title: 'Hall',
         number: '3',
         employees: [
             {
@@ -93,6 +101,22 @@ const restDepartments = [
                 position: restPositions[3],
                 salary: 1000,
                 isFired: false,
+            },
+            {
+                name: 'Elizabeth',
+                surname: 'Elizabeth',
+                departmentId: 2,
+                position: restPositions[3],
+                salary: 1000,
+                isFired: false,
+            },
+            {
+                name: 'Elizabeth',
+                surname: 'Elizabeth',
+                departmentId: 2,
+                position: restPositions[3],
+                salary: 1000,
+                isFired: true,
             },
         ],
     },
