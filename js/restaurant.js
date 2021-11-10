@@ -11,7 +11,6 @@ class Restaurant {
         this.#positionsId = positions || {};
 
         this.render();
-        console.log(this);
     }
 
     render() {
@@ -51,6 +50,15 @@ class Restaurant {
         `;
 
         const departmentsList = restaurant.querySelector('.departments');
+
+        if (this.#departments.length === 0) {
+            const message = document.createElement('P');
+            message.textContent = 'Departments not found!';
+
+            restaurant.replaceChild(message, departmentsList);
+
+            return restaurant;
+        }
 
         for (let i = 0; i < this.#departments.length; i++) {
             const { title, departmentId } = this.#departments[i];
@@ -145,7 +153,7 @@ class Restaurant {
         const department = event.target.dataset.number;
 
         this.#departments = this.#departments.filter(
-            ({ number }) => number !== department,
+            ({ departmentId }) => departmentId !== department,
         );
         this.render();
     }
@@ -281,24 +289,16 @@ class Restaurant {
     }
 
     createDepartment(department) {
-        try {
-            const checkDepartment = this.findDepartment(
-                department.departmentId,
-            );
+        const checkDepartment = this.findDepartment(department.departmentId);
 
-            if (checkDepartment) {
-                throw new Error(
-                    'Sorry, but department with such id already exist.',
-                );
-            }
-
-            department.employees = [];
-            this.#departments.push(department);
-
-            return department;
-        } catch (error) {
-            console.log(error);
+        if (checkDepartment) {
+            return false;
         }
+
+        department.employees = [];
+        this.#departments.push(department);
+
+        return department;
     }
 
     addEmployee(employee) {
