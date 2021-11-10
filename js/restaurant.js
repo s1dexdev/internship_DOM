@@ -53,8 +53,8 @@ class Restaurant {
 
         if (this.#departments.length === 0) {
             const message = document.createElement('P');
-            message.textContent = 'Departments not found!';
 
+            message.textContent = 'Departments not found!';
             restaurant.replaceChild(message, departmentsList);
 
             return restaurant;
@@ -231,7 +231,7 @@ class Restaurant {
             close() {
                 modalWindowMarkup.classList.remove('open');
             },
-            destroy() {
+            deleteMarkup() {
                 modalWindowMarkup.parentNode.removeChild(modalWindowMarkup);
                 modalWindowMarkup.removeEventListener('click', listener);
                 window.removeEventListener('keydown', listener);
@@ -245,7 +245,7 @@ class Restaurant {
         function listener(event) {
             if (event.target.dataset.close || event.code === 'Escape') {
                 modal.close();
-                modal.destroy();
+                modal.deleteMarkup();
             }
         }
 
