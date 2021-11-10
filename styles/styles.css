@@ -1,5 +1,6 @@
 body {
     font-family: 'Montserrat', sans-serif;
+    background-color: rgb(230, 253, 255);
 }
 
 img {
@@ -12,12 +13,52 @@ ul {
     padding: 0;
 }
 
-button {
+.app {
+    padding-left: 20px;
+}
+
+.app button {
+    padding: 5px 10px;
+
+    background-color: burlywood;
+
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
 }
 
-.app {
-    padding-left: 20px;
+.app button:hover {
+    background-color: rgb(238, 208, 169);
+}
+
+.departments {
+    display: flex;
+    flex-wrap: wrap;
+
+    margin: -10px;
+}
+
+.departments-item {
+    width: 300px;
+    margin: 15px;
+    padding: 10px;
+
+    background-color: rgb(255, 212, 133);
+
+    border: 1px solid black;
+    border-radius: 5px;
+
+    transition: box-shadow 100ms ease-in, transform 100ms ease-in;
+}
+
+.departments-item:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+    box-shadow: 10px 10px 8px 0px rgba(34, 60, 80, 0.2);
+}
+
+.text-title {
+    font-weight: 600;
 }
 
 .form {
@@ -33,17 +74,6 @@ button {
     margin-bottom: 20px;
 }
 
-.item {
-    width: 300px;
-
-    padding: 10px;
-    outline: 1px solid black;
-}
-
-.item:not(:last-child) {
-    margin-bottom: 15px;
-}
-
 .buttons {
     margin-top: 30px;
 }
@@ -54,12 +84,6 @@ button {
 .modal.open .modal-window {
     opacity: 1;
     z-index: 1000;
-}
-
-.modal-overlay,
-.modal-window {
-    opacity: 0;
-    z-index: -1;
 }
 
 .modal-overlay {

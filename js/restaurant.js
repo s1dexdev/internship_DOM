@@ -30,9 +30,7 @@ class Restaurant {
                 <button type="button" data-action="department">Add new department</button>
                 <button type="button" data-action="employee">Add new employee</button>
             </div>
-            <p>Departments info:</p>
-            <ul class="departments"></ul>
-            <p>General info:</p>
+            <p class="text-title">General info:</p>
             <ul>
                 <li>
                     <p>Number of employees: ${this.getNumberEmployees(
@@ -45,6 +43,9 @@ class Restaurant {
                     )}</p>
                 </li>
             </ul>
+            <p class="text-title">Departments info:</p>
+            <ul class="departments"></ul>
+            
          
             
         `;
@@ -64,7 +65,7 @@ class Restaurant {
             const { title, departmentId } = this.#departments[i];
             const item = document.createElement('LI');
 
-            item.classList.add('item');
+            item.classList.add('departments-item');
             item.innerHTML = `
                 <p>Department title - ${title}</p>
                 <p>Department number: ${departmentId}</p>
@@ -79,8 +80,6 @@ class Restaurant {
     }
 
     handleClick(event) {
-        event.preventDefault();
-
         const action = event.target.dataset.action;
 
         switch (action) {
