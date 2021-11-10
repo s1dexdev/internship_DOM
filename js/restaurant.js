@@ -11,25 +11,29 @@ class Restaurant {
         this.#positionsId = positions || {};
 
         this.render();
+        console.log(this);
     }
 
     render() {
         const restaurant = this.createRestaurantMarkup();
 
-        restaurant.addEventListener('click', this.handleClick.bind(this));
+        this.#wrapper.innerHTML = '';
         this.#wrapper.appendChild(restaurant);
+        restaurant.addEventListener('click', this.handleClick.bind(this));
     }
 
     createRestaurantMarkup() {
         const restaurant = document.createElement('DIV');
         const salaryInfo = this.getAmountSalaryTotal(salary => salary);
-        const salaryInfoDetail = this.getAmountSalaryDetail();
 
         restaurant.innerHTML = `
-            <img src="https://amc.ua/images/image-not-found.jpg" width="300" alt="Restaurant photo" />
-            <p>Departments info: </p>
+            <div class="buttons">
+                <button type="button" data-action="department">Add new department</button>
+                <button type="button" data-action="employee">Add new employee</button>
+            </div>
+            <p>Departments info:</p>
             <ul class="departments"></ul>
-            <p>General info</p>
+            <p>General info:</p>
             <ul>
                 <li>
                     <p>Number of employees: ${this.getNumberEmployees(
@@ -42,34 +46,23 @@ class Restaurant {
                     )}</p>
                 </li>
             </ul>
-            <div>
-                <button type="button" data-action="edit">Edit</button>
-                <button type="button" data-action="delete">Delete restaurant</button>
-            </div>
+         
             
         `;
 
         const departmentsList = restaurant.querySelector('.departments');
 
         for (let i = 0; i < this.#departments.length; i++) {
-            const { title } = this.#departments[i];
+            const { title, departmentId } = this.#departments[i];
             const item = document.createElement('LI');
 
+            item.classList.add('item');
             item.innerHTML = `
                 <p>Department title - ${title}</p>
+                <p>Department number: ${departmentId}</p>
                 <p>Total salary by department: ${salaryInfo[title]}</p>
-                <ul class="detail-salary"></ul>
+                <button type="button" data-action="delete" data-number=${departmentId}>Delete</button>
             `;
-
-            for (let item in salaryInfoDetail) {
-                const item = document.createElement('LI');
-
-                for (let key in item) {
-                    item.innerHTML = `
-                        <p>${item[key]}</p>
-                    `;
-                }
-            }
 
             departmentsList.appendChild(item);
         }
@@ -83,29 +76,148 @@ class Restaurant {
         const action = event.target.dataset.action;
 
         switch (action) {
-            case 'edit':
-                this.editRestaurantInfo(event);
+            case 'department':
+                this.createModal({
+                    formName: 'department',
+                    inputs: [
+                        {
+                            name: 'title',
+                            type: 'text',
+                            placeholder: 'title',
+                            class: 'input',
+                        },
+                        {
+                            name: 'departmentId',
+                            type: 'number',
+                            placeholder: 'department number',
+                            class: 'input',
+                        },
+                    ],
+                }).open();
+
+                break;
+            case 'employee':
+                this.createModal({
+                    formName: 'employee',
+                    inputs: [
+                        {
+                            name: 'name',
+                            type: 'text',
+                            placeholder: 'name',
+                            class: 'input',
+                        },
+                        {
+                            name: 'surname',
+                            type: 'text',
+                            placeholder: 'surname',
+                            class: 'input',
+                        },
+                        {
+                            name: 'departmentId',
+                            type: 'number',
+                            placeholder: 'departmentId',
+                            class: 'input',
+                        },
+                        {
+                            name: 'position',
+                            type: 'number',
+                            placeholder: 'position number',
+                            class: 'input',
+                        },
+                        {
+                            name: 'salary',
+                            type: 'number',
+                            placeholder: 'salary',
+                            class: 'input',
+                        },
+                    ],
+                }).open();
                 break;
             case 'delete':
-                this.#wrapper.removeChild(event.currentTarget);
+                this.deleteDepartment(event);
                 break;
             default:
                 return;
         }
     }
 
-    editRestaurantInfo(event) {
-        this.modal().open();
+    deleteDepartment(event) {
+        const department = event.target.dataset.number;
+
+        this.#departments = this.#departments.filter(
+            ({ number }) => number !== department,
+        );
+        this.render();
     }
 
-    modal() {
+    createForm({ formName, inputs }) {
+        const form = document.createElement('FORM');
+
+        form.classList.add('form');
+        form.setAttribute('data-name', formName);
+
+        for (let i = 0; i < inputs.length; i++) {
+            const input = document.createElement('INPUT');
+
+            for (let key in inputs[i]) {
+                input.setAttribute(key, inputs[i][key]);
+            }
+
+            form.appendChild(input);
+        }
+
+        form.insertAdjacentHTML(
+            'beforeend',
+            `
+            <button type="submit" data-action="accept">Add</button>
+        `,
+        );
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+
+            this.handleForm(event);
+        });
+
+        return form;
+    }
+
+    handleForm(event) {
+        const data = new FormData(event.target);
+        const result = {};
+
+        for (let item of data.entries()) {
+            let key = item[0];
+            let value = item[1];
+
+            if (key === 'salary') {
+                value = Number(value);
+            }
+
+            result[key] = value;
+        }
+
+        if (event.target.dataset.name === 'department') {
+            this.createDepartment(result);
+        }
+
+        if (event.target.dataset.name === 'employee') {
+            this.addEmployee(result);
+        }
+
+        this.render();
+    }
+
+    createModal(props) {
+        props = props || null;
+
         let isFlag = false;
-        const modalWindowMarkup = this.createModal();
         const modal = {
             open() {
                 if (isFlag) {
                     return;
                 }
+
                 modalWindowMarkup.classList.add('open');
             },
             close() {
@@ -120,12 +232,41 @@ class Restaurant {
             },
         };
 
-        const listener = event => {
+        const modalWindowMarkup = createMarkupModal(this);
+
+        function listener(event) {
             if (event.target.dataset.close || event.code === 'Escape') {
                 modal.close();
                 modal.destroy();
             }
-        };
+        }
+
+        function createMarkupModal(restaurant) {
+            const container = document.createElement('div');
+
+            container.classList.add('modal');
+            container.insertAdjacentHTML(
+                'afterbegin',
+                `
+                <div class="modal-overlay" data-close="true">
+                    <div class="modal-window">
+                        <span class="modal-close" data-close="true">&times;</span>
+
+                    </div>
+                </div>
+                `,
+            );
+
+            if (props) {
+                const modalWindow = container.querySelector('.modal-window');
+
+                modalWindow.appendChild(restaurant.createForm(props));
+            }
+
+            restaurant.#wrapper.appendChild(container);
+
+            return container;
+        }
 
         modalWindowMarkup.addEventListener('click', listener);
         window.addEventListener('keydown', listener);
@@ -133,34 +274,17 @@ class Restaurant {
         return modal;
     }
 
-    createModal() {
-        const container = document.createElement('div');
-
-        container.classList.add('modal');
-        container.insertAdjacentHTML(
-            'afterbegin',
-            `
-        <div class="modal-overlay" data-close="true">
-          <div class="modal-window">
-            <span class="modal-close" data-close="true">&times;</span>
-          </div>
-        </div>
-  `,
-        );
-
-        // container.querySelector('.modal-window').appendChild(markup);
-        document.body.appendChild(container);
-
-        return container;
-    }
-
     findDepartment(id) {
-        return this.#departments.find(department => department.id === id);
+        return this.#departments.find(
+            ({ departmentId }) => departmentId === id,
+        );
     }
 
-    createDepartment(title, id) {
+    createDepartment(department) {
         try {
-            const checkDepartment = this.findDepartment(id);
+            const checkDepartment = this.findDepartment(
+                department.departmentId,
+            );
 
             if (checkDepartment) {
                 throw new Error(
@@ -168,13 +292,12 @@ class Restaurant {
                 );
             }
 
-            const newDepartment = { title, id, employees: [] };
+            department.employees = [];
+            this.#departments.push(department);
 
-            this.#departments.push(newDepartment);
-
-            return newDepartment;
+            return department;
         } catch (error) {
-            return error;
+            console.log(error);
         }
     }
 
@@ -183,6 +306,8 @@ class Restaurant {
 
         if (checkDepartment) {
             employee.position = this.#positionsId[employee.position];
+            employee.isFired = false;
+
             checkDepartment.employees.push(employee);
 
             return employee;

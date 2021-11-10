@@ -8,12 +8,12 @@ const restPositions = {
 const restDepartments = [
     {
         title: 'Bar',
-        number: '1',
+        departmentId: '1',
         employees: [
             {
                 name: 'James',
                 surname: 'James',
-                departmentId: 1,
+                departmentId: '1',
                 position: restPositions[1],
                 salary: 5000,
                 isFired: false,
@@ -21,7 +21,7 @@ const restDepartments = [
             {
                 name: 'Robert',
                 surname: 'Robert',
-                departmentId: 1,
+                departmentId: '1',
                 position: restPositions[2],
                 salary: 3000,
                 isFired: false,
@@ -29,7 +29,7 @@ const restDepartments = [
             {
                 name: 'John',
                 surname: 'John',
-                departmentId: 1,
+                departmentId: '1',
                 position: restPositions[2],
                 salary: 3000,
                 isFired: false,
@@ -38,12 +38,12 @@ const restDepartments = [
     },
     {
         title: 'Cook',
-        number: '2',
+        departmentId: '2',
         employees: [
             {
                 name: 'Mary',
                 surname: 'Mary',
-                departmentId: 2,
+                departmentId: '2',
                 position: restPositions[1],
                 salary: 6000,
                 isFired: false,
@@ -51,7 +51,7 @@ const restDepartments = [
             {
                 name: 'Patricia',
                 surname: 'Patricia',
-                departmentId: 2,
+                departmentId: '2',
                 position: restPositions[3],
                 salary: 4000,
                 isFired: false,
@@ -59,7 +59,7 @@ const restDepartments = [
             {
                 name: 'Jennifer',
                 surname: 'Jennifer',
-                departmentId: 2,
+                departmentId: '2',
                 position: restPositions[3],
                 salary: 4000,
                 isFired: false,
@@ -67,7 +67,7 @@ const restDepartments = [
             {
                 name: 'Jennifer',
                 surname: 'Jennifer',
-                departmentId: 2,
+                departmentId: '2',
                 position: restPositions[3],
                 salary: 4000,
                 isFired: false,
@@ -76,12 +76,12 @@ const restDepartments = [
     },
     {
         title: 'Hall',
-        number: '3',
+        departmentId: '3',
         employees: [
             {
                 name: 'Michael',
                 surname: 'Michael',
-                departmentId: 2,
+                departmentId: '2',
                 position: restPositions[1],
                 salary: 3000,
                 isFired: false,
@@ -89,7 +89,7 @@ const restDepartments = [
             {
                 name: 'Linda',
                 surname: 'Linda',
-                departmentId: 2,
+                departmentId: '2',
                 position: restPositions[3],
                 salary: 1000,
                 isFired: false,
@@ -97,7 +97,7 @@ const restDepartments = [
             {
                 name: 'Elizabeth',
                 surname: 'Elizabeth',
-                departmentId: 2,
+                departmentId: '2',
                 position: restPositions[3],
                 salary: 1000,
                 isFired: false,
@@ -105,7 +105,7 @@ const restDepartments = [
             {
                 name: 'Elizabeth',
                 surname: 'Elizabeth',
-                departmentId: 2,
+                departmentId: '2',
                 position: restPositions[3],
                 salary: 1000,
                 isFired: false,
@@ -113,7 +113,7 @@ const restDepartments = [
             {
                 name: 'Elizabeth',
                 surname: 'Elizabeth',
-                departmentId: 2,
+                departmentId: '2',
                 position: restPositions[3],
                 salary: 1000,
                 isFired: true,

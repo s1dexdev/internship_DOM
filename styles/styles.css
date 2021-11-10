@@ -6,6 +6,48 @@ img {
     display: block;
 }
 
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+button {
+    cursor: pointer;
+}
+
+.app {
+    padding-left: 20px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+}
+
+.input {
+    padding: 5px 10px;
+}
+
+.input:not(:last-child) {
+    margin-bottom: 20px;
+}
+
+.item {
+    width: 300px;
+
+    padding: 10px;
+    outline: 1px solid black;
+}
+
+.item:not(:last-child) {
+    margin-bottom: 15px;
+}
+
+.buttons {
+    margin-top: 30px;
+}
+
 /* Modal */
 
 .modal.open .modal-overlay,
