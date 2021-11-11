@@ -18,7 +18,6 @@ class Restaurant {
 
         this.#wrapper.innerHTML = '';
         this.#wrapper.appendChild(restaurant);
-        restaurant.addEventListener('click', this.handleClick.bind(this));
     }
 
     createRestaurantMarkup() {
@@ -76,69 +75,72 @@ class Restaurant {
             departmentsList.appendChild(item);
         }
 
+        restaurant.addEventListener('click', this.handleClick.bind(this));
+
         return restaurant;
     }
 
     handleClick(event) {
+        const dataFormDepartment = {
+            formName: 'department',
+            inputs: [
+                {
+                    name: 'title',
+                    type: 'text',
+                    placeholder: 'title',
+                    class: 'input',
+                },
+                {
+                    name: 'departmentId',
+                    type: 'number',
+                    placeholder: 'department number',
+                    class: 'input',
+                },
+            ],
+        };
+        const dataFormEmployee = {
+            formName: 'employee',
+            inputs: [
+                {
+                    name: 'name',
+                    type: 'text',
+                    placeholder: 'name',
+                    class: 'input',
+                },
+                {
+                    name: 'surname',
+                    type: 'text',
+                    placeholder: 'surname',
+                    class: 'input',
+                },
+                {
+                    name: 'departmentId',
+                    type: 'number',
+                    placeholder: 'departmentId',
+                    class: 'input',
+                },
+                {
+                    name: 'position',
+                    type: 'number',
+                    placeholder: 'position number',
+                    class: 'input',
+                },
+                {
+                    name: 'salary',
+                    type: 'number',
+                    placeholder: 'salary',
+                    class: 'input',
+                },
+            ],
+        };
         const action = event.target.dataset.action;
 
         switch (action) {
             case 'department':
-                this.createModal({
-                    formName: 'department',
-                    inputs: [
-                        {
-                            name: 'title',
-                            type: 'text',
-                            placeholder: 'title',
-                            class: 'input',
-                        },
-                        {
-                            name: 'departmentId',
-                            type: 'number',
-                            placeholder: 'department number',
-                            class: 'input',
-                        },
-                    ],
-                }).open();
-
+                this.createModal(dataFormDepartment).open();
                 break;
             case 'employee':
-                this.createModal({
-                    formName: 'employee',
-                    inputs: [
-                        {
-                            name: 'name',
-                            type: 'text',
-                            placeholder: 'name',
-                            class: 'input',
-                        },
-                        {
-                            name: 'surname',
-                            type: 'text',
-                            placeholder: 'surname',
-                            class: 'input',
-                        },
-                        {
-                            name: 'departmentId',
-                            type: 'number',
-                            placeholder: 'departmentId',
-                            class: 'input',
-                        },
-                        {
-                            name: 'position',
-                            type: 'number',
-                            placeholder: 'position number',
-                            class: 'input',
-                        },
-                        {
-                            name: 'salary',
-                            type: 'number',
-                            placeholder: 'salary',
-                            class: 'input',
-                        },
-                    ],
-                }).open();
+                this.createModal(dataFormEmployee).open();
                 break;
             case 'delete':
                 this.deleteDepartment(event);
@@ -404,9 +406,5 @@ class Restaurant {
 }
 
 document.addEventListener('DOMContentLoaded', event => {
-    const app = document.querySelector('.app');
-
-    const a = new Restaurant('.app', restPositions, restDepartments);
-
-    // console.log(a);
+    new Restaurant('.app', restPositions, restDepartments);
 });
