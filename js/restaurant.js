@@ -69,7 +69,7 @@ class Restaurant {
                 <p>Department title - ${title}</p>
                 <p>Department number: ${departmentId}</p>
                 <p>Total salary by department: ${salaryInfo[title]}</p>
-                <button type="button" data-action="delete" data-number=${departmentId}>Delete</button>
+                <button type="button" data-action="delete">Delete</button>
             `;
 
             departmentsList.appendChild(item);
