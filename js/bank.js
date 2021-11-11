@@ -32,7 +32,7 @@ class Bank {
             <p>Total amount in the bank: <span class="total-amount"></span></p>
             <p>Owe to the bank: <span class="owe-amount"></span></p>
             <p>Number of debtors: <span class="debtors"></span></p>
-            <button class="add-client-btn" type="button" data-action="client">Add new client</button>
+            <button class="add-client-btn" type="button" data-action="addClient">Add new client</button>
         `,
         );
 
@@ -46,13 +46,22 @@ class Bank {
                     <p>Name: ${name} ${surname}</p>
                     <p>Registration date: ${registrationDate}</p>
                 </div>
-                <button type="button" data-action="add">Add new account</button>
+                <button type="button" data-action="addAccount" data-id=${id}>Add new account</button>
                 <button type="button" data-action="delete" data-id=${id}>Delete client</button>
                 <p>Accounts: </p>
                 <ul class="client-accounts"></ul>
             `;
 
                 const clientAccounts = client.querySelector('.client-accounts');
+
+                if (accounts.length === 0) {
+                    client.insertAdjacentHTML(
+                        'beforeend',
+                        `
+                        <p>Accounts not found!</p>
+                    `,
+                    );
+                }
 
                 accounts.forEach(account => {
                     const clientAccount = document.createElement('LI');
@@ -117,14 +126,48 @@ class Bank {
     }
 
     handleClick(event) {
+        const dataFormClient = {
+            formName: 'client',
+            inputs: [
+                {
+                    name: 'name',
+                    type: 'text',
+                    placeholder: 'name',
+                    class: 'input',
+                },
+                {
+                    name: 'surname',
+                    type: 'text',
+                    placeholder: 'surname',
+                    class: 'input',
+                },
+            ],
+        };
+        const dataFormAccount = {
+            formName: 'account',
+            inputs: [
+                {
+                    name: 'type',
+                    type: 'text',
+                    placeholder: 'account type',
+                    class: 'input',
+                },
+                {
+                    name: 'currency',
+                    placeholder: 'currency type',
+                    type: 'text',
+                    class: 'input',
+                },
+            ],
+        };
         const action = event.target.dataset.action;
 
         switch (action) {
-            case 'client':
-                this.createModal().open();
+            case 'addClient':
+                this.createModal(dataFormClient).open();
                 break;
-            case 'add':
-                this.createModal().open();
+            case 'addAccount':
+                this.createModal(dataFormAccount).open();
                 break;
             case 'delete':
                 this.deleteClient(event);
@@ -132,6 +175,63 @@ class Bank {
             default:
                 return;
         }
+    }
+
+    createForm({ formName, inputs }) {
+        const form = document.createElement('FORM');
+
+        form.classList.add('form');
+        form.setAttribute('data-name', formName);
+
+        for (let i = 0; i < inputs.length; i++) {
+            const input = document.createElement('INPUT');
+
+            for (let key in inputs[i]) {
+                input.setAttribute(key, inputs[i][key]);
+            }
+
+            form.appendChild(input);
+        }
+
+        form.insertAdjacentHTML(
+            'beforeend',
+            `
+            <button type="submit" data-action="accept">Add</button>
+        `,
+        );
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+
+            this.handleForm(event);
+        });
+
+        return form;
+    }
+
+    handleForm(event) {
+        const data = new FormData(event.target);
+        const result = {};
+
+        for (let item of data.entries()) {
+            let key = item[0];
+            let value = item[1];
+
+            result[key] = value;
+        }
+
+        if (event.target.dataset.name === 'client') {
+            this.addClient(result);
+        }
+
+        if (event.target.dataset.name === 'account') {
+            result.type = result.type.toLowerCase();
+            result.currency = result.currency.toUpperCase();
+
+            // this.createClientAccount(result);
+        }
+
+        this.render();
     }
 
     deleteClient(event) {
@@ -208,7 +308,7 @@ class Bank {
     }
 
     addClient(client) {
-        client.id = this.#genId; // Temp
+        client.id = String(this.#genId); // Temp
         client.isActive = true;
         client.registrationDate = new Date().toLocaleDateString();
         client.accounts = [];
@@ -219,7 +319,7 @@ class Bank {
         return true;
     }
 
-    createClientAccount(id, type, currency) {
+    createClientAccount({ id, type, currency }) {
         const client = this.findClientById(id);
         let account = {
             type,
