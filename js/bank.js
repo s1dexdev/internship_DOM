@@ -9,6 +9,101 @@ class Bank {
         this.#wrapper = document.querySelector(selector);
         this.#clients = bankClients || [];
         this.#genId = 4; // Temp
+
+        this.render();
+    }
+
+    render() {
+        const bank = this.createBankMarkup();
+
+        this.#wrapper.innerHTML = '';
+        this.#wrapper.appendChild(bank);
+    }
+
+    createBankMarkup() {
+        const bank = document.createElement('DIV');
+        const clientsList = document.createElement('UL');
+
+        bank.classList.add('bank-wrapper');
+        clientsList.classList.add('clients-list');
+        this.#clients.forEach(
+            ({ name, surname, registrationDate, accounts }) => {
+                const client = document.createElement('LI');
+
+                client.classList.add('client-item');
+                client.innerHTML = `
+                <div class="client-info">
+                    <p>Name: ${name} ${surname}</p>
+                    <p>Registration date: ${registrationDate}</p>
+                </div>
+                <button type="button" data-action="delete">Delete</button>
+                <p>Accounts: </p>
+                <ul class="client-accounts"></ul>
+            `;
+
+                const clientAccounts = client.querySelector('.client-accounts');
+
+                accounts.forEach(account => {
+                    const clientAccount = document.createElement('LI');
+
+                    clientAccount.classList.add('client-account');
+                    clientAccount.innerHTML = `
+                        <p>Account number: ${account.id}</p>
+                        <p>Type: ${account.type}</p>
+                        <p>Currency: ${account.currency}</p>
+                        <p>Expiry date: ${account.expiryDate}</p>
+                    `;
+
+                    if (account.type === 'debit') {
+                        clientAccount.insertAdjacentHTML(
+                            'beforeend',
+                            `
+                            <p>Balance: ${account.balance}</p>
+                        `,
+                        );
+                    }
+
+                    if (account.type === 'credit') {
+                        clientAccount.insertAdjacentHTML(
+                            'beforeend',
+                            `
+                            <p>Credit limit: ${account.creditLimit}</p>
+                            <p>Balance: ${
+                                account.balance.own + account.balance.credit
+                            }</p>
+                        `,
+                        );
+                    }
+
+                    clientAccounts.appendChild(clientAccount);
+                });
+
+                clientsList.appendChild(client);
+            },
+        );
+
+        bank.appendChild(clientsList);
+        bank.addEventListener('click', this.handleClick.bind(this));
+
+        return bank;
+    }
+
+    handleClick(event) {
+        const action = event.target.dataset.action;
+
+        switch (action) {
+            case 'delete':
+                this.deleteClient(event);
+                break;
+            default:
+                return;
+        }
+    }
+
+    deleteClient(event) {
+        const client = event.target.parentNode;
+
+        this.#wrapper.querySelector('.clients-list').removeChild(client);
     }
 
     addClient(client) {
@@ -213,7 +308,7 @@ class Bank {
 }
 
 document.addEventListener('DOMContentLoaded', event => {
-    const a = new Bank('app', bankClients);
+    const a = new Bank('.app', bankClients);
 
-    console.log(a);
+    // console.log(a);
 });

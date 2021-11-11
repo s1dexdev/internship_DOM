@@ -28,6 +28,47 @@ ul {
 }
 
 /* Bank */
+.bank-wrapper {
+    padding: 10px;
+}
+
+.client-item button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.clients-list {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -15px;
+}
+
+.client-item {
+    position: relative;
+    width: auto;
+    margin: 15px;
+    padding: 10px;
+
+    border: 1px solid black;
+}
+
+.client-info {
+    display: inline-block;
+}
+
+.client-accounts {
+    display: flex;
+    margin: -10px;
+}
+
+.client-account {
+    width: 200px;
+    margin: 10px;
+    padding: 5px;
+
+    border: 1px solid black;
+}
 
 /* Restauran */
 

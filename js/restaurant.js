@@ -151,12 +151,9 @@ class Restaurant {
     }
 
     deleteDepartment(event) {
-        const department = event.target.dataset.number;
+        const department = event.target.parentNode;
 
-        this.#departments = this.#departments.filter(
-            ({ departmentId }) => departmentId !== department,
-        );
-        this.render();
+        this.#wrapper.querySelector('.departments').removeChild(department);
     }
 
     createForm({ formName, inputs }) {
