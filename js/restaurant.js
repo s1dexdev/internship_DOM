@@ -1,4 +1,4 @@
-import { restPositions, restDepartments } from './dbRest.js';
+import { restPositions, restDepartments } from './db.js';
 
 class Restaurant {
     #wrapper;
