@@ -8,7 +8,7 @@ class Bank {
     constructor(selector, bankClients) {
         this.#wrapper = document.querySelector(selector);
         this.#clients = bankClients || [];
-        this.#genId = 4; // Temp
+        this.#genId = 5; // Temp
 
         this.render();
     }
@@ -26,8 +26,18 @@ class Bank {
 
         bank.classList.add('bank-wrapper');
         clientsList.classList.add('clients-list');
+        bank.insertAdjacentHTML(
+            'afterbegin',
+            `
+            <p>Total amount in the bank: <span class="total-amount"></span></p>
+            <p>Owe to the bank: <span class="owe-amount"></span></p>
+            <p>Number of debtors: <span class="debtors"></span></p>
+            <button class="add-client-btn" type="button" data-action="client">Add new client</button>
+        `,
+        );
+
         this.#clients.forEach(
-            ({ name, surname, registrationDate, accounts }) => {
+            ({ name, surname, id, registrationDate, accounts }) => {
                 const client = document.createElement('LI');
 
                 client.classList.add('client-item');
@@ -36,7 +46,8 @@ class Bank {
                     <p>Name: ${name} ${surname}</p>
                     <p>Registration date: ${registrationDate}</p>
                 </div>
-                <button type="button" data-action="delete">Delete</button>
+                <button type="button" data-action="add">Add new account</button>
+                <button type="button" data-action="delete" data-id=${id}>Delete client</button>
                 <p>Accounts: </p>
                 <ul class="client-accounts"></ul>
             `;
@@ -82,6 +93,23 @@ class Bank {
             },
         );
 
+        this.getAmountTotal('USD', 'UAH').then(data => {
+            this.#wrapper.querySelector(
+                '.total-amount',
+            ).textContent = `${data}$`;
+        });
+
+        this.getAmountClientsOwe('USD', 'UAH').then(
+            ({ amount, numberDebtors }) => {
+                this.#wrapper.querySelector(
+                    '.owe-amount',
+                ).textContent = `${amount}$`;
+                this.#wrapper.querySelector(
+                    '.debtors',
+                ).textContent = `${numberDebtors}`;
+            },
+        );
+
         bank.appendChild(clientsList);
         bank.addEventListener('click', this.handleClick.bind(this));
 
@@ -92,6 +120,12 @@ class Bank {
         const action = event.target.dataset.action;
 
         switch (action) {
+            case 'client':
+                this.createModal().open();
+                break;
+            case 'add':
+                this.createModal().open();
+                break;
             case 'delete':
                 this.deleteClient(event);
                 break;
@@ -101,9 +135,76 @@ class Bank {
     }
 
     deleteClient(event) {
-        const client = event.target.parentNode;
+        const clientId = event.target.dataset.id;
 
-        this.#wrapper.querySelector('.clients-list').removeChild(client);
+        this.#clients = this.#clients.filter(({ id }) => clientId !== id);
+        this.render();
+    }
+
+    createModal(props) {
+        props = props || null;
+
+        let isFlag = false;
+        const modal = {
+            open() {
+                if (isFlag) {
+                    return;
+                }
+
+                modalWindowMarkup.classList.add('open');
+            },
+            close() {
+                modalWindowMarkup.classList.remove('open');
+            },
+            deleteMarkup() {
+                modalWindowMarkup.parentNode.removeChild(modalWindowMarkup);
+                modalWindowMarkup.removeEventListener('click', listener);
+                window.removeEventListener('keydown', listener);
+
+                isFlag = true;
+            },
+        };
+
+        const modalWindowMarkup = createMarkupModal(this);
+
+        function listener(event) {
+            if (event.target.dataset.close || event.code === 'Escape') {
+                modal.close();
+                modal.deleteMarkup();
+            }
+        }
+
+        function createMarkupModal(restaurant) {
+            const container = document.createElement('div');
+
+            container.classList.add('modal');
+            container.insertAdjacentHTML(
+                'afterbegin',
+                `
+                <div class="modal-overlay" data-close="true">
+                    <div class="modal-window">
+                        <span class="modal-close" data-close="true">&times;</span>
+
+                    </div>
+                </div>
+                `,
+            );
+
+            if (props) {
+                const modalWindow = container.querySelector('.modal-window');
+
+                modalWindow.appendChild(restaurant.createForm(props));
+            }
+
+            restaurant.#wrapper.appendChild(container);
+
+            return container;
+        }
+
+        modalWindowMarkup.addEventListener('click', listener);
+        window.addEventListener('keydown', listener);
+
+        return modal;
     }
 
     addClient(client) {
@@ -238,7 +339,7 @@ class Bank {
         }, 0);
     }
 
-    async getAmountClientsOwe(mainCurrencyBank, mainCurrencyCountry, callback) {
+    async getAmountClientsOwe(mainCurrencyBank, mainCurrencyCountry) {
         const currencyRates = await this.getCurrencyRates();
 
         return this.#clients.reduce(
@@ -248,16 +349,12 @@ class Bank {
                     accumulator.numberDebtors = 0;
                 }
 
-                if (!callback(isActive)) {
-                    return accumulator;
-                }
-
-                const totalDebt = accounts.reduce((acc, accounut) => {
-                    let { type, currency } = accounut;
+                const totalDebt = accounts.reduce((acc, account) => {
+                    let { type, currency } = account;
 
                     if (type === 'credit') {
                         let loanAmount =
-                            accounut.creditLimit - accounut.balance.credit;
+                            account.creditLimit - account.balance.credit;
 
                         if (loanAmount < 0) {
                             return acc;
@@ -269,7 +366,7 @@ class Bank {
                             return acc;
                         }
 
-                        acc += this.conversionCurrencyToUsd(
+                        acc += this.conversionCurrency(
                             currencyRates,
                             currency,
                             loanAmount,
@@ -279,11 +376,14 @@ class Bank {
 
                         return acc;
                     }
+
+                    return acc;
                 }, 0);
 
                 if (totalDebt > 0) {
                     accumulator.numberDebtors++;
                 }
+
                 accumulator.amount += totalDebt;
 
                 return accumulator;
@@ -308,7 +408,5 @@ class Bank {
 }
 
 document.addEventListener('DOMContentLoaded', event => {
-    const a = new Bank('.app', bankClients);
-
-    // console.log(a);
+    new Bank('.app', bankClients);
 });

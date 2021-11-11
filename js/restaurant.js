@@ -69,7 +69,7 @@ class Restaurant {
                 <p>Department title - ${title}</p>
                 <p>Department number: ${departmentId}</p>
                 <p>Total salary by department: ${salaryInfo[title]}</p>
-                <button type="button" data-action="delete">Delete</button>
+                <button type="button" data-action="delete" data-number=${departmentId}>Delete</button>
             `;
 
             departmentsList.appendChild(item);
@@ -151,9 +151,13 @@ class Restaurant {
     }
 
     deleteDepartment(event) {
-        const department = event.target.parentNode;
+        const id = event.target.dataset.number;
 
-        this.#wrapper.querySelector('.departments').removeChild(department);
+        this.#departments = this.#departments.filter(
+            ({ departmentId }) => departmentId !== id,
+        );
+
+        this.render();
     }
 
     createForm({ formName, inputs }) {
