@@ -253,11 +253,11 @@ class Bank {
     addClientAccount({ id, type, currency }) {
         const client = this.findClientById(id);
         let account = {
-            type: type.toLowerCase(),
+            type,
             number: this.#genId, // Temp
             balance: null,
             expiryDate: this.setExpiryDateClientCard(1, 3),
-            currency: currency.toUpperCase(),
+            currency,
             isActive: true,
         };
 
@@ -296,12 +296,14 @@ class Bank {
                     type: 'text',
                     placeholder: 'name',
                     class: 'input',
+                    pattern: '[a-zA-Z]{2,10}',
                 },
                 {
                     name: 'surname',
                     type: 'text',
                     placeholder: 'surname',
                     class: 'input',
+                    pattern: '[a-zA-Z]{2,10}',
                 },
             ],
         }).open();
@@ -319,12 +321,14 @@ class Bank {
                     type: 'text',
                     placeholder: 'account type',
                     class: 'input',
+                    pattern: '[a-z]{5,6}',
                 },
                 {
                     name: 'currency',
                     placeholder: 'currency type',
                     type: 'text',
                     class: 'input',
+                    pattern: '[a-z]{2,3}',
                 },
             ],
         }).open();
