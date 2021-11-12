@@ -25,8 +25,8 @@ class Restaurant {
 
         restaurant.innerHTML = `
             <div class="buttons">
-                <button type="button" data-action="department">Add new department</button>
-                <button type="button" data-action="employee">Add new employee</button>
+                <button type="button" data-action="setDepartmentForm">Add new department</button>
+                <button type="button" data-action="setEmployeeForm">Add new employee</button>
             </div>
             <p class="text-title">General info:</p>
             <ul>
@@ -46,7 +46,11 @@ class Restaurant {
         `;
 
         restaurant.appendChild(this.createMarkupDepartment());
-        restaurant.addEventListener('click', this.handleClick.bind(this));
+        restaurant.addEventListener('click', event => {
+            const { action } = event.target.dataset;
+
+            this[action](event);
+        });
 
         return restaurant;
     }
@@ -66,7 +70,7 @@ class Restaurant {
                 <p>Department title - ${title}</p>
                 <p>Department number: ${departmentId}</p>
                 <p>Total salary by department: ${salaryInfo[title]}</p>
-                <button type="button" data-action="delete" data-number=${departmentId}>Delete</button>
+                <button type="button" data-action="deleteDepartment" data-number=${departmentId}>Delete</button>
             `;
 
             departmentsList.appendChild(item);
@@ -75,88 +79,8 @@ class Restaurant {
         return departmentsList;
     }
 
-    handleClick(event) {
-        const { action } = event.target.dataset;
-
-        const propsFormDepartment = {
-            formName: 'department',
-            inputs: [
-                {
-                    name: 'title',
-                    type: 'text',
-                    placeholder: 'title',
-                    class: 'input',
-                },
-                {
-                    name: 'departmentId',
-                    type: 'number',
-                    placeholder: 'department number',
-                    class: 'input',
-                },
-            ],
-        };
-        const propsFormEmployee = {
-            formName: 'employee',
-            inputs: [
-                {
-                    name: 'name',
-                    type: 'text',
-                    placeholder: 'name',
-                    class: 'input',
-                },
-                {
-                    name: 'surname',
-                    type: 'text',
-                    placeholder: 'surname',
-                    class: 'input',
-                },
-                {
-                    name: 'departmentId',
-                    type: 'number',
-                    placeholder: 'departmentId',
-                    class: 'input',
-                },
-                {
-                    name: 'position',
-                    type: 'number',
-                    placeholder: 'position number',
-                    class: 'input',
-                },
-                {
-                    name: 'salary',
-                    type: 'number',
-                    placeholder: 'salary',
-                    class: 'input',
-                },
-            ],
-        };
-
-        switch (action) {
-            case 'department':
-                this.createModal(propsFormDepartment).open();
-                break;
-            case 'employee':
-                this.createModal(propsFormEmployee).open();
-                break;
-            case 'delete':
-                this.deleteDepartment(event);
-                break;
-            default:
-                return;
-        }
-    }
-
-    deleteDepartment(event) {
-        const id = event.target.dataset.number;
-
-        this.#departments = this.#departments.filter(
-            ({ departmentId }) => departmentId !== id,
-        );
-
-        this.render();
-    }
-
-    createMarkupForm({ formName, inputs }) {
+    createMarkupForm(props) {
+        const { formName, inputs } = props;
         const form = document.createElement('FORM');
 
         form.classList.add('form');
@@ -189,6 +113,7 @@ class Restaurant {
     }
 
     handleForm(event) {
+        const { name } = event.target.dataset;
         const data = new FormData(event.target);
         const result = {};
 
@@ -203,22 +128,73 @@ class Restaurant {
             result[key] = value;
         }
 
-        if (event.target.dataset.name === 'department') {
-            this.createDepartment(result);
-        }
-
-        if (event.target.dataset.name === 'employee') {
-            this.addEmployee(result);
-        }
-
+        this[name](result);
         this.render();
+    }
+
+    setDepartmentForm() {
+        this.createModal({
+            formName: 'createDepartment',
+            inputs: [
+                {
+                    name: 'title',
+                    type: 'text',
+                    placeholder: 'title',
+                    class: 'input',
+                },
+                {
+                    name: 'departmentId',
+                    type: 'number',
+                    placeholder: 'department number',
+                    class: 'input',
+                },
+            ],
+        });
+    }
+
+    setEmployeeForm() {
+        this.createModal({
+            formName: 'createEmployee',
+            inputs: [
+                {
+                    name: 'name',
+                    type: 'text',
+                    placeholder: 'name',
+                    class: 'input',
+                },
+                {
+                    name: 'surname',
+                    type: 'text',
+                    placeholder: 'surname',
+                    class: 'input',
+                },
+                {
+                    name: 'departmentId',
+                    type: 'number',
+                    placeholder: 'departmentId',
+                    class: 'input',
+                },
+                {
+                    name: 'position',
+                    type: 'number',
+                    placeholder: 'position number',
+                    class: 'input',
+                },
+                {
+                    name: 'salary',
+                    type: 'number',
+                    placeholder: 'salary',
+                    class: 'input',
+                },
+            ],
+        }).open();
     }
 
     createModal(props) {
         props = props || null;
 
         let isFlag = false;
-        const modalWindowMarkup = createMarkupModal(this);
+        const modalWindowMarkup = this.createMarkupModal(props);
         const modal = {
             open() {
                 if (isFlag) {
@@ -246,13 +222,19 @@ class Restaurant {
             }
         }
 
-        function createMarkupModal(restaurant) {
-            const container = document.createElement('div');
+        modalWindowMarkup.addEventListener('click', listener);
+        window.addEventListener('keydown', listener);
 
-            container.classList.add('modal');
-            container.insertAdjacentHTML(
-                'afterbegin',
-                `
+        return modal;
+    }
+
+    createMarkupModal(props) {
+        const container = document.createElement('div');
+
+        container.classList.add('modal');
+        container.insertAdjacentHTML(
+            'afterbegin',
+            `
                 <div class="modal-overlay" data-close="true">
                     <div class="modal-window">
                         <span class="modal-close" data-close="true">&times;</span>
@@ -260,20 +242,24 @@ class Restaurant {
                     </div>
                 </div>
                 `,
-            );
+        );
 
-            const modalWindow = container.querySelector('.modal-window');
+        const modalWindow = container.querySelector('.modal-window');
 
-            modalWindow.appendChild(restaurant.createMarkupForm(props));
-            restaurant.#wrapper.appendChild(container);
+        modalWindow.appendChild(this.createMarkupForm(props));
+        this.#wrapper.appendChild(container);
 
-            return container;
-        }
+        return container;
+    }
 
-        modalWindowMarkup.addEventListener('click', listener);
-        window.addEventListener('keydown', listener);
+    deleteDepartment(event) {
+        const id = event.target.dataset.number;
 
-        return modal;
+        this.#departments = this.#departments.filter(
+            ({ departmentId }) => departmentId !== id,
+        );
+
+        this.render();
     }
 
     findDepartment(id) {
@@ -295,7 +281,7 @@ class Restaurant {
         return department;
     }
 
-    addEmployee(employee) {
+    createEmployee(employee) {
         const checkDepartment = this.findDepartment(employee.departmentId);
 
         if (checkDepartment) {

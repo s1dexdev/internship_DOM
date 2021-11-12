@@ -30,12 +30,16 @@ class Bank {
             <p>Total amount in the bank: <span class="total-amount"></span></p>
             <p>Owe to the bank: <span class="owe-amount"></span></p>
             <p>Number of debtors: <span class="debtors"></span></p>
-            <button class="add-client-btn" type="button" data-action="addClient">Add new client</button>
+            <button class="add-client-btn" type="button" data-action="setClientForm">Add new client</button>
         `,
         );
 
         bank.appendChild(this.createMarkupClientCard());
-        bank.addEventListener('click', this.handleClick.bind(this));
+        bank.addEventListener('click', event => {
+            const { action } = event.target.dataset;
+
+            this[action](event);
+        });
 
         this.getAmountTotal('USD', 'UAH').then(data => {
             this.#wrapper.querySelector(
@@ -71,8 +75,8 @@ class Bank {
                     <p>Name: ${name} ${surname}</p>
                     <p>Registration date: ${registrationDate}</p>
                 </div>
-                <button type="button" data-action="addAccount" data-id=${id}>Add new account</button>
-                <button type="button" data-action="delete" data-id=${id}>Delete client</button>
+                <button type="button" data-action="setAccountForm">Add new account</button>
+                <button type="button" data-action="deleteClient" data-id=${id}>Delete client</button>
                 <p>Accounts: </p>
                 <ul class="client-accounts"></ul>
             `;
@@ -125,63 +129,7 @@ class Bank {
         return clientAccount;
     }
 
-    handleClick(event) {
-        const { action, id } = event.target.dataset;
-
-        const propsFormClient = {
-            formName: 'client',
-            inputs: [
-                {
-                    name: 'name',
-                    type: 'text',
-                    placeholder: 'name',
-                    class: 'input',
-                },
-                {
-                    name: 'surname',
-                    type: 'text',
-                    placeholder: 'surname',
-                    class: 'input',
-                },
-            ],
-        };
-        const propsFormAccount = {
-            id,
-            formName: 'account',
-            inputs: [
-                {
-                    name: 'type',
-                    type: 'text',
-                    placeholder: 'account type',
-                    class: 'input',
-                },
-                {
-                    name: 'currency',
-                    placeholder: 'currency type',
-                    type: 'text',
-                    class: 'input',
-                },
-            ],
-        };
-
-        switch (action) {
-            case 'addClient':
-                this.createModal(propsFormClient).open();
-                break;
-            case 'addAccount':
-                this.createModal(propsFormAccount).open();
-                break;
-            case 'delete':
-                this.deleteClient(event);
-                break;
-            default:
-                return;
-        }
-    }
-
     createModal(props) {
-        props = props || null;
-
         let isFlag = false;
         const modal = {
             open() {
@@ -203,7 +151,7 @@ class Bank {
             },
         };
 
-        const modalWindowMarkup = createMarkupModal(this);
+        const modalWindowMarkup = this.createMarkupModal(props);
 
         function listener(event) {
             if (event.target.dataset.close || event.code === 'Escape') {
@@ -212,13 +160,19 @@ class Bank {
             }
         }
 
-        function createMarkupModal(bank) {
-            const container = document.createElement('div');
+        modalWindowMarkup.addEventListener('click', listener);
+        window.addEventListener('keydown', listener);
 
-            container.classList.add('modal');
-            container.insertAdjacentHTML(
-                'afterbegin',
-                `
+        return modal;
+    }
+
+    createMarkupModal(props) {
+        const container = document.createElement('div');
+
+        container.classList.add('modal');
+        container.insertAdjacentHTML(
+            'afterbegin',
+            `
                 <div class="modal-overlay" data-close="true">
                     <div class="modal-window">
                         <span class="modal-close" data-close="true">&times;</span>
@@ -226,27 +180,21 @@ class Bank {
                     </div>
                 </div>
                 `,
-            );
+        );
 
-            const modalWindow = container.querySelector('.modal-window');
+        const modalWindow = container.querySelector('.modal-window');
 
-            modalWindow.appendChild(bank.createMarkupForm(props));
-            bank.#wrapper.appendChild(container);
+        modalWindow.appendChild(this.createMarkupForm(props));
+        this.#wrapper.appendChild(container);
 
-            return container;
-        }
-
-        modalWindowMarkup.addEventListener('click', listener);
-        window.addEventListener('keydown', listener);
-
-        return modal;
+        return container;
     }
 
     createMarkupForm({ id, formName, inputs }) {
         const form = document.createElement('FORM');
 
         form.classList.add('form');
-        form.setAttribute('data-name', formName);
+        form.setAttribute('data-action', formName);
 
         for (let i = 0; i < inputs.length; i++) {
             const input = document.createElement('INPUT');
@@ -275,6 +223,7 @@ class Bank {
     }
 
     handleForm(event) {
+        const { action } = event.target.dataset;
         const data = new FormData(event.target);
         const result = {};
 
@@ -285,27 +234,7 @@ class Bank {
             result[key] = value;
         }
 
-        if (event.target.dataset.name === 'client') {
-            this.addClient(result);
-        }
-
-        if (event.target.dataset.name === 'account') {
-            const clientId = event.target.querySelector('button').dataset.id;
-
-            result.id = clientId;
-            result.type = result.type.toLowerCase();
-            result.currency = result.currency.toUpperCase();
-
-            this.createClientAccount(result);
-        }
-
-        this.render();
-    }
-
-    deleteClient(event) {
-        const clientId = event.target.dataset.id;
-
-        this.#clients = this.#clients.filter(({ id }) => clientId !== id);
+        this[action](result);
         this.render();
     }
 
@@ -321,14 +250,14 @@ class Bank {
         return true;
     }
 
-    createClientAccount({ id, type, currency }) {
+    addClientAccount({ id, type, currency }) {
         const client = this.findClientById(id);
         let account = {
-            type,
+            type: type.toLowerCase(),
             number: this.#genId, // Temp
             balance: null,
             expiryDate: this.setExpiryDateClientCard(1, 3),
-            currency,
+            currency: currency.toUpperCase(),
             isActive: true,
         };
 
@@ -349,6 +278,56 @@ class Bank {
         this.#genId++; // Temp
 
         return client;
+    }
+
+    deleteClient(event) {
+        const clientId = event.target.dataset.id;
+
+        this.#clients = this.#clients.filter(({ id }) => clientId !== id);
+        this.render();
+    }
+
+    setClientForm() {
+        this.createModal({
+            formName: 'addClient',
+            inputs: [
+                {
+                    name: 'name',
+                    type: 'text',
+                    placeholder: 'name',
+                    class: 'input',
+                },
+                {
+                    name: 'surname',
+                    type: 'text',
+                    placeholder: 'surname',
+                    class: 'input',
+                },
+            ],
+        }).open();
+    }
+
+    setAccountForm(event) {
+        const { id } = event.target.dataset;
+
+        this.createModal({
+            id,
+            formName: 'addClientAccount',
+            inputs: [
+                {
+                    name: 'type',
+                    type: 'text',
+                    placeholder: 'account type',
+                    class: 'input',
+                },
+                {
+                    name: 'currency',
+                    placeholder: 'currency type',
+                    type: 'text',
+                    class: 'input',
+                },
+            ],
+        }).open();
     }
 
     findClientById(id) {
