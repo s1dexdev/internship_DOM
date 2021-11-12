@@ -8,7 +8,7 @@ class Bank {
     constructor(selector, bankClients) {
         this.#wrapper = document.querySelector(selector);
         this.#clients = bankClients || [];
-        this.#genId = 5; // Temp
+        this.#genId = 1; // Temp
 
         this.render();
     }
@@ -20,12 +20,10 @@ class Bank {
         this.#wrapper.appendChild(bank);
     }
 
-    createBankMarkup() {
+    createMarkupBank() {
         const bank = document.createElement('DIV');
-        const clientsList = document.createElement('UL');
 
         bank.classList.add('bank-wrapper');
-        clientsList.classList.add('clients-list');
         bank.insertAdjacentHTML(
             'afterbegin',
             `
@@ -36,71 +34,8 @@ class Bank {
         `,
         );
 
-        this.#clients.forEach(
-            ({ name, surname, id, registrationDate, accounts }) => {
-                const client = document.createElement('LI');
-
-                client.classList.add('client-item');
-                client.innerHTML = `
-                <div class="client-info">
-                    <p>Name: ${name} ${surname}</p>
-                    <p>Registration date: ${registrationDate}</p>
-                </div>
-                <button type="button" data-action="addAccount" data-id=${id}>Add new account</button>
-                <button type="button" data-action="delete" data-id=${id}>Delete client</button>
-                <p>Accounts: </p>
-                <ul class="client-accounts"></ul>
-            `;
-
-                const clientAccounts = client.querySelector('.client-accounts');
-
-                if (accounts.length === 0) {
-                    client.insertAdjacentHTML(
-                        'beforeend',
-                        `
-                        <p>Accounts not found!</p>
-                    `,
-                    );
-                }
-
-                accounts.forEach(account => {
-                    const clientAccount = document.createElement('LI');
-
-                    clientAccount.classList.add('client-account');
-                    clientAccount.innerHTML = `
-                        <p>Account number: ${account.id}</p>
-                        <p>Type: ${account.type}</p>
-                        <p>Currency: ${account.currency}</p>
-                        <p>Expiry date: ${account.expiryDate}</p>
-                    `;
-
-                    if (account.type === 'debit') {
-                        clientAccount.insertAdjacentHTML(
-                            'beforeend',
-                            `
-                            <p>Balance: ${account.balance}</p>
-                        `,
-                        );
-                    }
-
-                    if (account.type === 'credit') {
-                        clientAccount.insertAdjacentHTML(
-                            'beforeend',
-                            `
-                            <p>Credit limit: ${account.creditLimit}</p>
-                            <p>Balance: ${
-                                account.balance.own + account.balance.credit
-                            }</p>
-                        `,
-                        );
-                    }
-
-                    clientAccounts.appendChild(clientAccount);
-                });
-
-                clientsList.appendChild(client);
-            },
-        );
+        bank.appendChild(this.createClientCard());
+        bank.addEventListener('click', this.handleClick.bind(this));
 
         this.getAmountTotal('USD', 'UAH').then(data => {
             this.#wrapper.querySelector(
@@ -119,10 +54,73 @@ class Bank {
             },
         );
 
-        bank.appendChild(clientsList);
-        bank.addEventListener('click', this.handleClick.bind(this));
-
         return bank;
+    }
+
+    createMarkupClientCard() {
+        const clientsList = document.createElement('UL');
+
+        clientsList.classList.add('clients-list');
+        this.#clients.forEach(
+            ({ name, surname, id, registrationDate, accounts }) => {
+                const client = document.createElement('LI');
+
+                client.classList.add('client-item');
+                client.innerHTML = `
+                <div class="client-info">
+                    <p>Name: ${name} ${surname}</p>
+                    <p>Registration date: ${registrationDate}</p>
+                </div>
+                <button type="button" data-action="addAccount" data-id=${id}>Add new account</button>
+                <button type="button" data-action="delete" data-id=${id}>Delete client</button>
+                <p>Accounts: </p>
+                <ul class="client-accounts"></ul>
+            `;
+
+                const clientAccounts = client.querySelector('.client-accounts');
+
+                accounts.forEach(account =>
+                    clientAccounts.appendChild(this.addClientAccount(account)),
+                );
+
+                clientsList.appendChild(client);
+            },
+        );
+
+        return clientsList;
+    }
+
+    addMarkupClientAccount(account) {
+        const clientAccount = document.createElement('LI');
+
+        clientAccount.classList.add('client-account');
+        clientAccount.innerHTML = `
+                        <p>Account number: ${account.id}</p>
+                        <p>Type: ${account.type}</p>
+                        <p>Currency: ${account.currency}</p>
+                        <p>Expiry date: ${account.expiryDate}</p>
+                    `;
+
+        if (account.type === 'debit') {
+            clientAccount.insertAdjacentHTML(
+                'beforeend',
+                `
+                <p>Balance: ${account.balance}</p>
+                `,
+            );
+        }
+
+        if (account.type === 'credit') {
+            clientAccount.insertAdjacentHTML(
+                'beforeend',
+                `
+                <p>Credit limit: ${account.creditLimit}</p>
+                <p>Balance: ${account.balance.own + account.balance.credit}</p>
+                `,
+            );
+        }
+
+        return clientAccount;
     }
 
     handleClick(event) {
@@ -180,7 +178,73 @@ class Bank {
         }
     }
 
-    createForm({ id, formName, inputs }) {
+    createModal(props) {
+        props = props || null;
+
+        let isFlag = false;
+        const modal = {
+            open() {
+                if (isFlag) {
+                    return;
+                }
+
+                modalWindowMarkup.classList.add('open');
+            },
+            close() {
+                modalWindowMarkup.classList.remove('open');
+            },
+            deleteMarkup() {
+                modalWindowMarkup.parentNode.removeChild(modalWindowMarkup);
+                modalWindowMarkup.removeEventListener('click', listener);
+                window.removeEventListener('keydown', listener);
+
+                isFlag = true;
+            },
+        };
+
+        const modalWindowMarkup = createMarkupModal(this);
+
+        function listener(event) {
+            if (event.target.dataset.close || event.code === 'Escape') {
+                modal.close();
+                modal.deleteMarkup();
+            }
+        }
+
+        function createMarkupModal(bank) {
+            const container = document.createElement('div');
+
+            container.classList.add('modal');
+            container.insertAdjacentHTML(
+                'afterbegin',
+                `
+                <div class="modal-overlay" data-close="true">
+                    <div class="modal-window">
+                        <span class="modal-close" data-close="true">&times;</span>
+
+                    </div>
+                </div>
+                `,
+            );
+
+            if (props) {
+                const modalWindow = container.querySelector('.modal-window');
+
+                modalWindow.appendChild(bank.createForm(props));
+            }
+
+            bank.#wrapper.appendChild(container);
+
+            return container;
+        }
+
+        modalWindowMarkup.addEventListener('click', listener);
+        window.addEventListener('keydown', listener);
+
+        return modal;
+    }
+
+    createMarkupForm({ id, formName, inputs }) {
         const form = document.createElement('FORM');
 
         form.classList.add('form');
@@ -245,72 +309,6 @@ class Bank {
 
         this.#clients = this.#clients.filter(({ id }) => clientId !== id);
         this.render();
-    }
-
-    createModal(props) {
-        props = props || null;
-
-        let isFlag = false;
-        const modal = {
-            open() {
-                if (isFlag) {
-                    return;
-                }
-
-                modalWindowMarkup.classList.add('open');
-            },
-            close() {
-                modalWindowMarkup.classList.remove('open');
-            },
-            deleteMarkup() {
-                modalWindowMarkup.parentNode.removeChild(modalWindowMarkup);
-                modalWindowMarkup.removeEventListener('click', listener);
-                window.removeEventListener('keydown', listener);
-
-                isFlag = true;
-            },
-        };
-
-        const modalWindowMarkup = createMarkupModal(this);
-
-        function listener(event) {
-            if (event.target.dataset.close || event.code === 'Escape') {
-                modal.close();
-                modal.deleteMarkup();
-            }
-        }
-
-        function createMarkupModal(restaurant) {
-            const container = document.createElement('div');
-
-            container.classList.add('modal');
-            container.insertAdjacentHTML(
-                'afterbegin',
-                `
-                <div class="modal-overlay" data-close="true">
-                    <div class="modal-window">
-                        <span class="modal-close" data-close="true">&times;</span>
-
-                    </div>
-                </div>
-                `,
-            );
-
-            if (props) {
-                const modalWindow = container.querySelector('.modal-window');
-
-                modalWindow.appendChild(restaurant.createForm(props));
-            }
-
-            restaurant.#wrapper.appendChild(container);
-
-            return container;
-        }
-
-        modalWindowMarkup.addEventListener('click', listener);
-        window.addEventListener('keydown', listener);
-
-        return modal;
     }
 
     addClient(client) {
