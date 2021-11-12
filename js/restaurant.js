@@ -78,7 +78,7 @@ class Restaurant {
     handleClick(event) {
         const { action } = event.target.dataset;
 
-        const dataFormDepartment = {
+        const propsFormDepartment = {
             formName: 'department',
             inputs: [
                 {
@@ -95,7 +95,7 @@ class Restaurant {
                 },
             ],
         };
-        const dataFormEmployee = {
+        const propsFormEmployee = {
             formName: 'employee',
             inputs: [
                 {
@@ -133,10 +133,10 @@ class Restaurant {
 
         switch (action) {
             case 'department':
-                this.createModal(dataFormDepartment).open();
+                this.createModal(propsFormDepartment).open();
                 break;
             case 'employee':
-                this.createModal(dataFormEmployee).open();
+                this.createModal(propsFormEmployee).open();
                 break;
             case 'delete':
                 this.deleteDepartment(event);

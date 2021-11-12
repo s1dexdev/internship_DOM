@@ -128,7 +128,7 @@ class Bank {
     handleClick(event) {
         const { action, id } = event.target.dataset;
 
-        const dataFormClient = {
+        const propsFormClient = {
             formName: 'client',
             inputs: [
                 {
@@ -145,7 +145,7 @@ class Bank {
                 },
             ],
         };
-        const dataFormAccount = {
+        const propsFormAccount = {
             id,
             formName: 'account',
             inputs: [
@@ -166,11 +166,10 @@ class Bank {
 
         switch (action) {
             case 'addClient':
-                // addClient
-                this.createModal(dataFormClient).open();
+                this.createModal(propsFormClient).open();
                 break;
             case 'addAccount':
-                this.createModal(dataFormAccount).open();
+                this.createModal(propsFormAccount).open();
                 break;
             case 'delete':
                 this.deleteClient(event);
