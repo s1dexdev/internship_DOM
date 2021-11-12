@@ -218,6 +218,7 @@ class Restaurant {
         props = props || null;
 
         let isFlag = false;
+        const modalWindowMarkup = createMarkupModal(this);
         const modal = {
             open() {
                 if (isFlag) {
@@ -237,8 +238,6 @@ class Restaurant {
                 isFlag = true;
             },
         };
-
-        const modalWindowMarkup = createMarkupModal(this);
 
         function listener(event) {
             if (event.target.dataset.close || event.code === 'Escape') {
@@ -263,12 +262,9 @@ class Restaurant {
                 `,
             );
 
-            if (props) {
-                const modalWindow = container.querySelector('.modal-window');
+            const modalWindow = container.querySelector('.modal-window');
 
-                modalWindow.appendChild(restaurant.createMarkupForm(props));
-            }
-
+            modalWindow.appendChild(restaurant.createMarkupForm(props));
             restaurant.#wrapper.appendChild(container);
 
             return container;

@@ -228,12 +228,9 @@ class Bank {
                 `,
             );
 
-            if (props) {
-                const modalWindow = container.querySelector('.modal-window');
+            const modalWindow = container.querySelector('.modal-window');
 
-                modalWindow.appendChild(bank.createForm(props));
-            }
-
+            modalWindow.appendChild(bank.createMarkupForm(props));
             bank.#wrapper.appendChild(container);
 
             return container;
