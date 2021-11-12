@@ -14,7 +14,7 @@ class Bank {
     }
 
     render() {
-        const bank = this.createBankMarkup();
+        const bank = this.createMarkupBank();
 
         this.#wrapper.innerHTML = '';
         this.#wrapper.appendChild(bank);
@@ -34,7 +34,7 @@ class Bank {
         `,
         );
 
-        bank.appendChild(this.createClientCard());
+        bank.appendChild(this.createMarkupClientCard());
         bank.addEventListener('click', this.handleClick.bind(this));
 
         this.getAmountTotal('USD', 'UAH').then(data => {
@@ -80,7 +80,9 @@ class Bank {
                 const clientAccounts = client.querySelector('.client-accounts');
 
                 accounts.forEach(account =>
-                    clientAccounts.appendChild(this.addClientAccount(account)),
+                    clientAccounts.appendChild(
+                        this.createMarkupClientAccount(account),
+                    ),
                 );
 
                 clientsList.appendChild(client);
@@ -90,7 +92,7 @@ class Bank {
         return clientsList;
     }
 
-    addMarkupClientAccount(account) {
+    createMarkupClientAccount(account) {
         const clientAccount = document.createElement('LI');
 
         clientAccount.classList.add('client-account');

@@ -14,15 +14,14 @@ class Restaurant {
     }
 
     render() {
-        const restaurant = this.createRestaurantMarkup();
+        const restaurant = this.createMarkupRestaurant();
 
         this.#wrapper.innerHTML = '';
         this.#wrapper.appendChild(restaurant);
     }
 
-    createRestaurantMarkup() {
+    createMarkupRestaurant() {
         const restaurant = document.createElement('DIV');
-        const salaryInfo = this.getAmountSalaryTotal(salary => salary);
 
         restaurant.innerHTML = `
             <div class="buttons">
@@ -43,22 +42,20 @@ class Restaurant {
                 </li>
             </ul>
             <p class="text-title">Departments info:</p>
-            <ul class="departments"></ul>
-            
-         
-            
+                   
         `;
 
-        const departmentsList = restaurant.querySelector('.departments');
+        restaurant.appendChild(this.createMarkupDepartment());
+        restaurant.addEventListener('click', this.handleClick.bind(this));
 
-        if (this.#departments.length === 0) {
-            const message = document.createElement('P');
+        return restaurant;
+    }
 
-            message.textContent = 'Departments not found!';
-            restaurant.replaceChild(message, departmentsList);
+    createMarkupDepartment() {
+        const salaryInfo = this.getAmountSalaryTotal(salary => salary);
+        const departmentsList = document.createElement('UL');
 
-            return restaurant;
-        }
+        departmentsList.classList.add('departments');
 
         for (let i = 0; i < this.#departments.length; i++) {
             const { title, departmentId } = this.#departments[i];
@@ -75,9 +72,7 @@ class Restaurant {
             departmentsList.appendChild(item);
         }
 
-        restaurant.addEventListener('click', this.handleClick.bind(this));
-
-        return restaurant;
+        return departmentsList;
     }
 
     handleClick(event) {
@@ -160,7 +155,7 @@ class Restaurant {
         this.render();
     }
 
-    createForm({ formName, inputs }) {
+    createMarkupForm({ formName, inputs }) {
         const form = document.createElement('FORM');
 
         form.classList.add('form');
@@ -270,7 +265,7 @@ class Restaurant {
             if (props) {
                 const modalWindow = container.querySelector('.modal-window');
 
-                modalWindow.appendChild(restaurant.createForm(props));
+                modalWindow.appendChild(restaurant.createMarkupForm(props));
             }
 
             restaurant.#wrapper.appendChild(container);
