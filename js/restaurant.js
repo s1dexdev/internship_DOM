@@ -76,6 +76,8 @@ class Restaurant {
     }
 
     handleClick(event) {
+        const { action } = event.target.dataset;
+
         const dataFormDepartment = {
             formName: 'department',
             inputs: [
@@ -128,7 +130,6 @@ class Restaurant {
                 },
             ],
         };
-        const action = event.target.dataset.action;
 
         switch (action) {
             case 'department':
