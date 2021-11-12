@@ -126,6 +126,8 @@ class Bank {
     }
 
     handleClick(event) {
+        const { action, id } = event.target.dataset;
+
         const dataFormClient = {
             formName: 'client',
             inputs: [
@@ -144,6 +146,7 @@ class Bank {
             ],
         };
         const dataFormAccount = {
+            id,
             formName: 'account',
             inputs: [
                 {
@@ -160,10 +163,10 @@ class Bank {
                 },
             ],
         };
-        const action = event.target.dataset.action;
 
         switch (action) {
             case 'addClient':
+                // addClient
                 this.createModal(dataFormClient).open();
                 break;
             case 'addAccount':
@@ -177,7 +180,7 @@ class Bank {
         }
     }
 
-    createForm({ formName, inputs }) {
+    createForm({ id, formName, inputs }) {
         const form = document.createElement('FORM');
 
         form.classList.add('form');
@@ -196,7 +199,7 @@ class Bank {
         form.insertAdjacentHTML(
             'beforeend',
             `
-            <button type="submit" data-action="accept">Add</button>
+            <button type="submit" data-action="accept" data-id=${id}>Add</button>
         `,
         );
 
@@ -225,10 +228,13 @@ class Bank {
         }
 
         if (event.target.dataset.name === 'account') {
+            const clientId = event.target.querySelector('button').dataset.id;
+
+            result.id = clientId;
             result.type = result.type.toLowerCase();
             result.currency = result.currency.toUpperCase();
 
-            // this.createClientAccount(result);
+            this.createClientAccount(result);
         }
 
         this.render();
