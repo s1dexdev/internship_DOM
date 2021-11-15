@@ -3,12 +3,12 @@ import { bankClients } from './db.js';
 class Bank {
     #wrapper;
     #clients;
-    #genId; // Temp
+    #genId;
 
     constructor(selector, bankClients) {
         this.#wrapper = document.querySelector(selector);
         this.#clients = bankClients || [];
-        this.#genId = 1; // Temp
+        this.#genId = 1;
 
         this.render();
     }
@@ -239,13 +239,13 @@ class Bank {
     }
 
     addClient(client) {
-        client.id = String(this.#genId); // Temp
+        client.id = String(this.#genId);
         client.isActive = true;
         client.registrationDate = new Date().toLocaleDateString();
         client.accounts = [];
 
         this.#clients.push(client);
-        this.#genId++; // Temp
+        this.#genId++;
 
         return true;
     }
@@ -254,7 +254,7 @@ class Bank {
         const client = this.findClientById(id);
         let account = {
             type,
-            number: this.#genId, // Temp
+            number: this.#genId,
             balance: null,
             expiryDate: this.setExpiryDateClientCard(1, 3),
             currency,
@@ -275,7 +275,7 @@ class Bank {
         }
 
         client.accounts.push(account);
-        this.#genId++; // Temp
+        this.#genId++;
 
         return client;
     }
